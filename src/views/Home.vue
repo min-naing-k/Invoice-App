@@ -31,15 +31,28 @@
         </div>
       </div>
     </div>
+
+    <!-- Invoices -->
+    <div v-if="invoices.length">
+      <Invoice
+        v-for="invoice in invoices"
+        :key="invoice.id"
+        :invoice="invoice"
+      />
+    </div>
+    <div v-else>Loading Data....</div>
   </div>
 </template>
 
 <script>
-import { ref } from "@vue/reactivity";
+import Invoice from "../components/Invoice";
+import { ref, computed } from "vue";
 import { useStore } from "vuex";
 export default {
   name: "Home",
-  components: {},
+  components: {
+    Invoice,
+  },
   setup() {
     const store = useStore();
     const filterMenu = ref(false);
@@ -57,10 +70,13 @@ export default {
       store.commit("toggleInvoiceModal");
     };
 
+    const invoices = computed(() => store.state.invoiceData);
+
     return {
       toggleFilterMenu,
       filterMenu,
       newInvoice,
+      invoices,
     };
   },
 };
