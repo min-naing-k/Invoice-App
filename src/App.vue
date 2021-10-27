@@ -19,7 +19,7 @@
 import Modal from "./components/Modal";
 import InvoiceModal from "./components/InvoiceModal";
 import Navigation from "./components/Navigation";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 export default {
   components: {
@@ -38,6 +38,10 @@ export default {
 
     window.addEventListener("resize", checkScreen);
     window.addEventListener("load", checkScreen);
+
+    onMounted(() => {
+      store.dispatch("getInvoices");
+    });
 
     const invoiceModal = computed(() => store.state.invoiceModal);
     const modalActive = computed(() => store.state.modalActive);
