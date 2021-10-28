@@ -5,6 +5,7 @@ export default createStore({
   state: {
     invoiceData: [],
     invoiceModal: false,
+    invoiceLoading: true,
     modalActive: false,
   },
   mutations: {
@@ -16,22 +17,18 @@ export default createStore({
     },
     updateInvoiceData(state, result) {
       state.invoiceData = result;
-      // console.log(state.invoiceData);
+      state.invoiceLoading = false;
     },
   },
   actions: {
-    getInvoices({ commit, state }) {
+    getInvoices({ commit }) {
       db.collection('invoices')
-        .orderBy('created_at')
+        .orderBy('created_at', 'desc')
         .onSnapshot((snap) => {
           const result = [];
           snap.docs.forEach((doc) => {
-            // dont allow duplicate data
-            // some() return true or false
-            if (!state.invoiceData.some((invoice) => invoice.id === doc.id)) {
-              const document = { ...doc.data(), id: doc.id };
-              doc.data().created_at && result.push(document);
-            }
+            const document = { ...doc.data(), id: doc.id };
+            doc.data().created_at && result.push(document);
           });
           commit('updateInvoiceData', result);
         });

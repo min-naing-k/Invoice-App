@@ -2,7 +2,9 @@
   <div v-if="!mobile" class="app flex flex-column">
     <Navigation />
     <div class="app-content flex flex-column">
-      <Modal v-show="modalActive" />
+      <transition name="modal">
+        <Modal v-show="modalActive" />
+      </transition>
       <transition name="invoiceModal">
         <InvoiceModal v-if="invoiceModal" />
       </transition>
@@ -19,7 +21,7 @@
 import Modal from "./components/Modal";
 import InvoiceModal from "./components/InvoiceModal";
 import Navigation from "./components/Navigation";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { useStore } from "vuex";
 export default {
   components: {
@@ -39,9 +41,10 @@ export default {
     window.addEventListener("resize", checkScreen);
     window.addEventListener("load", checkScreen);
 
-    onMounted(() => {
-      store.dispatch("getInvoices");
-    });
+    /**
+     * ? Get all invoices
+     */
+    store.dispatch("getInvoices");
 
     const invoiceModal = computed(() => store.state.invoiceModal);
     const modalActive = computed(() => store.state.modalActive);
@@ -67,5 +70,15 @@ export default {
 
 .invoiceModal-leave-active {
   transition: all 0.8s ease-in;
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 0.2s ease;
 }
 </style>
