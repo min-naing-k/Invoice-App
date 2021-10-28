@@ -2,7 +2,7 @@
   <div>
     <router-link
       class="invoice flex"
-      :to="{ name: 'invoiceDetail', params: { invoiceId: invoice.invoiceId } }"
+      :to="{ name: 'invoiceDetail', params: { id: invoice.id } }"
     >
       <div class="left flex">
         <span class="tracking-number">#{{ invoice.invoiceId }}</span>
