@@ -33,20 +33,29 @@
     </div>
 
     <!-- Invoices -->
-    <div v-if="invoices.length">
+    <div v-if="!invoiceLoading && invoices.length">
       <Invoice
         v-for="invoice in invoices"
         :key="invoice.id"
         :invoice="invoice"
       />
     </div>
-    <div v-else>Loading Data....</div>
+
+    <div v-else-if="invoiceLoading">Loading Data....</div>
+
+    <div v-else-if="!invoices.length" class="empty flex flex-column">
+      <img src="@/assets/illustration-empty.svg" alt="empty" />
+      <h3>There is nothing here</h3>
+      <p>
+        Create a new invoice by clicking the New Invoice button and get started
+      </p>
+    </div>
   </div>
 </template>
 
 <script>
 import Invoice from "../components/Invoice";
-import { ref, computed } from "vue";
+import { ref, computed, reactive, toRefs } from "vue";
 import { useStore } from "vuex";
 export default {
   name: "Home",
@@ -70,13 +79,16 @@ export default {
       store.commit("toggleInvoiceModal");
     };
 
-    const invoices = computed(() => store.state.invoiceData);
+    const computedInvoiceData = reactive({
+      invoices: computed(() => store.state.invoiceData),
+      invoiceLoading: computed(() => store.state.invoiceLoading),
+    });
 
     return {
+      ...toRefs(computedInvoiceData),
       toggleFilterMenu,
       filterMenu,
       newInvoice,
-      invoices,
     };
   },
 };
@@ -163,6 +175,26 @@ export default {
         }
       }
     }
+  }
+}
+
+.empty {
+  margin-top: 100px;
+  align-items: center;
+  img {
+    width: 214px;
+    height: 200px;
+  }
+  h3 {
+    font-size: 20px;
+    margin-top: 40px;
+  }
+  p {
+    text-align: center;
+    max-width: 224px;
+    font-size: 12px;
+    font-weight: 300;
+    margin-top: 16px;
   }
 }
 

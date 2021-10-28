@@ -235,14 +235,18 @@ export default {
       store.commit("toggleInvoiceModal");
     };
 
-    // get current date for invoice date field
+    /**
+     * ? get current date for invoice date field
+     */
     state.invoiceDateUnix = Date.now();
     state.invoiceDate = new Date(state.invoiceDateUnix).toLocaleDateString(
       "en-us",
       state.dateOption
     );
 
-    // get the future date for payment due date
+    /**
+     * ? get the future date for payment due date
+     */
     watch(
       () => state.paymentTerms,
       () => {
@@ -256,7 +260,9 @@ export default {
       }
     );
 
-    // Add Items
+    /**
+     * ? Add Item
+     */
     const addNewInvoiceItem = () => {
       state.invoiceItemList.push({
         id: uid(),
@@ -267,14 +273,20 @@ export default {
       });
     };
 
-    // Delete Items
+    /**
+     * ? Delete Items
+     * @param string item's id
+     */
     const deleteInvoiceItem = (id) => {
       state.invoiceItemList = state.invoiceItemList.filter(
         (item) => item.id !== id
       );
     };
 
-    // Calculate Total Price of Items
+    /**
+     * ? Calculate Total Price of Items
+     * @return total number
+     */
     const calInvoiceTotal = () => {
       state.invoiceTotal = state.invoiceItemList.reduce((total, item) => {
         return total + item.total;
@@ -296,6 +308,7 @@ export default {
       }
 
       state.isLoading = true;
+      document.querySelector(".invoice-wrap").style.pointerEvents = "none";
 
       calInvoiceTotal();
 

@@ -18,6 +18,7 @@ export default {
     const store = useStore();
 
     const closeInvoice = () => {
+      document.querySelector(".invoice-wrap").style.pointerEvents = "none";
       store.commit("toggleInvoiceModal");
       store.commit("toggleModal");
     };
