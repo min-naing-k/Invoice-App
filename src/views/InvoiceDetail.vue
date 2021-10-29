@@ -118,7 +118,7 @@
 </template>
 
 <script>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useStore } from "vuex";
 
 export default {
@@ -126,16 +126,28 @@ export default {
   setup(props) {
     const store = useStore();
     const invoice = ref(null);
+    const data = computed(() => store.state.invoiceDetail[0]);
+    const editModal = computed(() => store.state.editModal);
 
     store.commit("getInvoice", props.id);
-    const data = computed(() => store.state.invoiceDetail);
 
-    if (data.value) {
-      invoice.value = data.value[0];
-    }
+    /**
+     * * Edit Invoice
+     */
+    const toggleEditInvoice = () => {
+      store.commit("toggleEditModal");
+      store.commit("toggleInvoiceModal");
+    };
+
+    invoice.value = data.value;
+
+    watch(editModal, () => {
+      invoice.value = data.value;
+    });
 
     return {
       invoice,
+      toggleEditInvoice,
     };
   },
 };

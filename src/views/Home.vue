@@ -41,9 +41,7 @@
       />
     </div>
 
-    <div v-else-if="invoiceLoading">Loading Data....</div>
-
-    <div v-else-if="!invoices.length" class="empty flex flex-column">
+    <div v-else class="empty flex flex-column">
       <img src="@/assets/illustration-empty.svg" alt="empty" />
       <h3>There is nothing here</h3>
       <p>
@@ -76,6 +74,10 @@ export default {
     });
 
     const newInvoice = () => {
+      const editModal = computed(() => store.state.editModal);
+      if (editModal.value) {
+        store.commit("toggleEditModal");
+      }
       store.commit("toggleInvoiceModal");
     };
 

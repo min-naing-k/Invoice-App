@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import { computed } from "vue";
 import { useStore } from "vuex";
 export default {
   name: "modal",
@@ -19,6 +20,10 @@ export default {
 
     const closeInvoice = () => {
       document.querySelector(".invoice-wrap").style.pointerEvents = "none";
+      const editModal = computed(() => store.state.editModal);
+      if (editModal.value) {
+        store.commit("toggleEditModal");
+      }
       store.commit("toggleInvoiceModal");
       store.commit("toggleModal");
     };

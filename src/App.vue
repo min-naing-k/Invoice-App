@@ -35,6 +35,10 @@ export default {
   setup() {
     const store = useStore();
     const mobile = ref(null);
+    const appLoaded = computed(() => store.state.appLoaded);
+    const invoiceModal = computed(() => store.state.invoiceModal);
+    const modalActive = computed(() => store.state.modalActive);
+
     const checkScreen = () => {
       if (window.innerWidth <= 750) return (mobile.value = true);
 
@@ -48,10 +52,6 @@ export default {
      * ? Get all invoices
      */
     store.dispatch("getInvoices");
-
-    const appLoaded = computed(() => store.state.appLoaded);
-    const invoiceModal = computed(() => store.state.invoiceModal);
-    const modalActive = computed(() => store.state.modalActive);
 
     return {
       mobile,
