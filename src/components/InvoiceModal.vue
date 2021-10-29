@@ -6,7 +6,8 @@
   >
     <form @submit.prevent="submitForm" class="invoice-content">
       <Loading v-show="isLoading" />
-      <h1>New Invoice</h1>
+      <h1 v-if="!editModal">New Invoice</h1>
+      <h1 v-else>Edit Invoice</h1>
       <!-- Bill From -->
       <div class="bill-from flex flex-column">
         <h4>Bill Form</h4>
@@ -177,11 +178,29 @@
           </button>
         </div>
         <div class="right flex">
-          <button type="submit" @click="saveDraft" class="dark-purple">
+          <button
+            v-if="!editModal"
+            type="submit"
+            @click="saveDraft"
+            class="dark-purple"
+          >
             Save Draft
           </button>
-          <button type="submit" @click="publishInvoice" class="purple">
+          <button
+            v-if="!editModal"
+            type="submit"
+            @click="publishInvoice"
+            class="purple"
+          >
             Create Invoice
+          </button>
+          <button
+            v-if="editModal"
+            type="submit"
+            @click="updateInvoice"
+            class="purple"
+          >
+            Update Invoice
           </button>
         </div>
       </div>
@@ -191,11 +210,12 @@
 
 <script>
 import Loading from "./Loading";
-import { reactive, toRefs, watch } from "vue";
+import { computed, reactive, toRefs, watch } from "vue";
 import { useStore } from "vuex";
 import { uid } from "uid";
 import { timestamp } from "../firebase/config";
 import useCollection from "../composable/useCollection";
+import { db } from "../firebase/config";
 export default {
   components: { Loading },
   name: "invoiceModal",
@@ -226,23 +246,52 @@ export default {
       invoiceTotal: 0,
       error: null,
     });
+    const editModal = computed(() => store.state.editModal);
+    const currentInvoice = computed(() => store.state.invoiceDetail[0]);
+
+    if (editModal.value) {
+      state.billerStreetAddress = currentInvoice.value.billerStreetAddress;
+      state.billerCity = currentInvoice.value.billerCity;
+      state.billerZipCode = currentInvoice.value.billerZipCode;
+      state.billerCountry = currentInvoice.value.billerCountry;
+      state.clientName = currentInvoice.value.clientName;
+      state.clientEmail = currentInvoice.value.clientEmail;
+      state.clientStreetAddress = currentInvoice.value.clientStreetAddress;
+      state.clientCity = currentInvoice.value.clientCity;
+      state.clientZipCode = currentInvoice.value.clientZipCode;
+      state.clientCountry = currentInvoice.value.clientCountry;
+      state.invoiceDateUnix = currentInvoice.value.invoiceDateUnix;
+      state.invoiceDate = currentInvoice.value.invoiceDate;
+      state.paymentTerms = currentInvoice.value.paymentTerms;
+      state.paymentDueDateUnix = currentInvoice.value.paymentDueDateUnix;
+      state.paymentDueDate = currentInvoice.value.paymentDueDate;
+      state.productDescription = currentInvoice.value.productDescription;
+      state.invoicePending = currentInvoice.value.invoicePending;
+      state.invoiceDraft = currentInvoice.value.invoiceDraft;
+      state.invoiceItemList = currentInvoice.value.invoiceItemList;
+    }
 
     const checkClick = () => {
       store.commit("toggleModal");
     };
 
     const closeInvoice = () => {
+      if (editModal.value) {
+        store.commit("toggleEditModal");
+      }
       store.commit("toggleInvoiceModal");
     };
 
     /**
      * ? get current date for invoice date field
      */
-    state.invoiceDateUnix = Date.now();
-    state.invoiceDate = new Date(state.invoiceDateUnix).toLocaleDateString(
-      "en-us",
-      state.dateOption
-    );
+    if (!editModal.value) {
+      state.invoiceDateUnix = Date.now();
+      state.invoiceDate = new Date(state.invoiceDateUnix).toLocaleDateString(
+        "en-us",
+        state.dateOption
+      );
+    }
 
     /**
      * ? get the future date for payment due date
@@ -351,8 +400,51 @@ export default {
       store.commit("toggleInvoiceModal");
     };
 
+    const updateInvoice = async () => {
+      if (state.invoiceItemList.length <= 0) {
+        alert("Please ensure you filled out work items");
+        return;
+      }
+      state.isLoading = true;
+      document.querySelector(".invoice-wrap").style.pointerEvents = "none";
+      calInvoiceTotal();
+      const updateInvoice = {
+        billerStreetAddress: state.billerStreetAddress,
+        billerCity: state.billerCity,
+        billerZipCode: state.billerZipCode,
+        billerCountry: state.billerCountry,
+        clientName: state.clientName,
+        clientEmail: state.clientEmail,
+        clientStreetAddress: state.clientStreetAddress,
+        clientCity: state.clientCity,
+        clientZipCode: state.clientZipCode,
+        clientCountry: state.clientCountry,
+        invoiceDateUnix: state.invoiceDateUnix,
+        invoiceDate: state.invoiceDate,
+        paymentTerms: state.paymentTerms,
+        paymentDueDateUnix: state.paymentDueDateUnix,
+        paymentDueDate: state.paymentDueDate,
+        productDescription: state.productDescription,
+        invoicePending: state.invoicePending,
+        invoiceDraft: state.invoiceDraft,
+        invoiceItemList: state.invoiceItemList,
+        invoiceTotal: state.invoiceTotal,
+      };
+      const database = db.collection("invoices").doc(currentInvoice.value.id);
+      await database.update(updateInvoice);
+      state.isLoading = false;
+      store.commit("getInvoice", currentInvoice.value.id);
+      store.commit("toggleInvoiceModal");
+      store.commit("toggleEditModal");
+    };
+
     const submitForm = () => {
-      uploadInvoice();
+      if (!editModal.value) {
+        uploadInvoice();
+        return;
+      }
+
+      updateInvoice();
     };
 
     return {
@@ -364,6 +456,7 @@ export default {
       saveDraft,
       publishInvoice,
       submitForm,
+      editModal,
     };
   },
 };

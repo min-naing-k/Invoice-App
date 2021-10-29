@@ -9,6 +9,7 @@ export default createStore({
     invoiceLoading: true,
     invoiceDetail: [],
     modalActive: false,
+    editModal: null,
   },
   mutations: {
     updateAppLoaded(state) {
@@ -20,6 +21,9 @@ export default createStore({
     toggleModal(state) {
       state.modalActive = !state.modalActive;
     },
+    toggleEditModal(state) {
+      state.editModal = !state.editModal;
+    },
     updateInvoiceData(state, result) {
       state.invoiceData = result;
       state.invoiceLoading = false;
@@ -29,9 +33,14 @@ export default createStore({
         return invoice.id === id;
       });
     },
+    deleteInvoice(state, id) {
+      state.invoiceData = state.invoiceData.filter(
+        (invoice) => invoice.id !== id,
+      );
+    },
   },
   actions: {
-    async getInvoices({ commit }) {
+    getInvoices({ commit }) {
       db.collection('invoices')
         .orderBy('created_at', 'desc')
         .onSnapshot((snap) => {
