@@ -29,7 +29,6 @@ export default createStore({
     },
     updateInvoiceData(state, result) {
       state.invoiceData = result;
-      state.invoiceLoading = false;
     },
     getInvoice(state, id) {
       state.invoiceDetail = state.invoiceData.filter((invoice) => {
