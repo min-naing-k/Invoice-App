@@ -120,14 +120,18 @@
 <script>
 import { computed, ref, watch } from "vue";
 import { useStore } from "vuex";
+import { db } from "../firebase/config";
+import { useRouter } from "vue-router";
 
 export default {
   props: ["id"],
   setup(props) {
     const store = useStore();
+    const router = useRouter();
     const invoice = ref(null);
     const data = computed(() => store.state.invoiceDetail[0]);
     const editModal = computed(() => store.state.editModal);
+    const status = computed(() => store.state.status);
 
     store.commit("getInvoice", props.id);
 
@@ -145,9 +149,48 @@ export default {
       invoice.value = data.value;
     });
 
+    watch(status, () => {
+      invoice.value = data.value;
+    });
+
+    /**
+     * * Delete Invoice
+     */
+    const deleteInvoice = async (id) => {
+      await db.collection("invoices").doc(id).delete();
+      router.push("/");
+    };
+
+    /**
+     * * Mark As Paid
+     */
+    const updateStatusToPaid = async (id) => {
+      await db.collection("invoices").doc(id).update({
+        invoicePaid: true,
+        invoicePending: null,
+      });
+      store.commit("toggleStatus");
+      store.commit("getInvoice", props.id);
+    };
+    /**
+     * * Mark As Pending
+     */
+    const updateStatusToPending = async (id) => {
+      await db.collection("invoices").doc(id).update({
+        invoicePending: true,
+        invoicePaid: null,
+        invoiceDraft: null,
+      });
+      store.commit("toggleStatus");
+      store.commit("getInvoice", props.id);
+    };
+
     return {
       invoice,
       toggleEditInvoice,
+      deleteInvoice,
+      updateStatusToPaid,
+      updateStatusToPending,
     };
   },
 };

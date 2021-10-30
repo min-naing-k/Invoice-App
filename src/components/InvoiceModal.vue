@@ -382,6 +382,7 @@ export default {
         productDescription: state.productDescription,
         invoicePending: state.invoicePending,
         invoiceDraft: state.invoiceDraft,
+        invoicePaid: null,
         invoiceItemList: state.invoiceItemList,
         invoiceTotal: state.invoiceTotal,
       };

@@ -4,11 +4,14 @@
     <div class="header flex">
       <div class="left flex flex-column">
         <h1>Invoices</h1>
-        <span>There are 4 total invoices</span>
+        <span>
+          There are {{ invoices.length }} total
+          {{ invoices.length > 1 ? "invoices" : "invoice" }}
+        </span>
       </div>
       <div class="right flex">
         <div @click="toggleFilterMenu" class="filter flex dropdown">
-          <span class="dropdown">Filter by status</span>
+          <span class="dropdown">Filter by status {{ filterStatus }}</span>
           <img
             src="@/assets/icon-arrow-down.svg"
             alt="icon-arrow-down"
@@ -16,10 +19,10 @@
           />
           <transition name="dropdown">
             <ul v-show="filterMenu" class="filter-menu">
-              <li>Draft</li>
-              <li>Pending</li>
-              <li>Paid</li>
-              <li>Clear Filter</li>
+              <li @click="filterByStatus('Draft')">Draft</li>
+              <li @click="filterByStatus('Pending')">Pending</li>
+              <li @click="filterByStatus('Paid')">Paid</li>
+              <li @click="filterByStatus('')">Clear Filter</li>
             </ul>
           </transition>
         </div>
@@ -33,7 +36,7 @@
     </div>
 
     <!-- Invoices -->
-    <div v-if="!invoiceLoading && invoices.length">
+    <div v-if="invoices.length">
       <Invoice
         v-for="invoice in invoices"
         :key="invoice.id"
@@ -53,7 +56,7 @@
 
 <script>
 import Invoice from "../components/Invoice";
-import { ref, computed, reactive, toRefs } from "vue";
+import { ref, computed, reactive } from "vue";
 import { useStore } from "vuex";
 export default {
   name: "Home",
@@ -63,6 +66,14 @@ export default {
   setup() {
     const store = useStore();
     const filterMenu = ref(false);
+    const filterStatus = ref(null);
+    const invoices = ref([]);
+    const computedInvoiceData = reactive({
+      invoices: computed(() => store.state.invoiceData),
+    });
+
+    invoices.value = computedInvoiceData.invoices;
+
     const toggleFilterMenu = () => {
       filterMenu.value = !filterMenu.value;
     };
@@ -81,16 +92,39 @@ export default {
       store.commit("toggleInvoiceModal");
     };
 
-    const computedInvoiceData = reactive({
-      invoices: computed(() => store.state.invoiceData),
-      invoiceLoading: computed(() => store.state.invoiceLoading),
-    });
+    const filterByStatus = (status) => {
+      if (!status) {
+        filterStatus.value = status;
+        invoices.value = computedInvoiceData.invoices;
+        return;
+      }
+      filterStatus.value = `: ${status}`;
+      switch (status) {
+        case "Draft":
+          invoices.value = computedInvoiceData.invoices.filter(
+            (invoice) => invoice.invoiceDraft === true
+          );
+          break;
+        case "Paid":
+          invoices.value = computedInvoiceData.invoices.filter(
+            (invoice) => invoice.invoicePaid === true
+          );
+          break;
+        case "Pending":
+          invoices.value = computedInvoiceData.invoices.filter(
+            (invoice) => invoice.invoicePending === true
+          );
+          break;
+      }
+    };
 
     return {
-      ...toRefs(computedInvoiceData),
+      invoices,
       toggleFilterMenu,
       filterMenu,
       newInvoice,
+      filterByStatus,
+      filterStatus,
     };
   },
 };
