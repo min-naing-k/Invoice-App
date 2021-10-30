@@ -6,10 +6,10 @@ export default createStore({
     appLoaded: true,
     invoiceData: [],
     invoiceModal: false,
-    invoiceLoading: true,
     invoiceDetail: [],
     modalActive: false,
     editModal: null,
+    status: null,
   },
   mutations: {
     updateAppLoaded(state) {
@@ -23,6 +23,9 @@ export default createStore({
     },
     toggleEditModal(state) {
       state.editModal = !state.editModal;
+    },
+    toggleStatus(state) {
+      state.status = !state.status;
     },
     updateInvoiceData(state, result) {
       state.invoiceData = result;
