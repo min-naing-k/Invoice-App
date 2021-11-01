@@ -4,14 +4,19 @@
     <div class="header flex">
       <div class="left flex flex-column">
         <h1>Invoices</h1>
-        <span>
+        <span v-if="invoices.length">
           There are {{ invoices.length }} total
           {{ invoices.length > 1 ? "invoices" : "invoice" }}
         </span>
       </div>
       <div class="right flex">
         <div @click="toggleFilterMenu" class="filter flex dropdown">
-          <span class="dropdown">Filter by status {{ filterStatus }}</span>
+          <span class="dropdown">
+            Filter by status
+            <span v-if="filterStatus" class="dropdown">
+              : {{ filterStatus }}
+            </span>
+          </span>
           <img
             src="@/assets/icon-arrow-down.svg"
             alt="icon-arrow-down"
@@ -22,6 +27,7 @@
               <li @click="filterByStatus('Draft')">Draft</li>
               <li @click="filterByStatus('Pending')">Pending</li>
               <li @click="filterByStatus('Paid')">Paid</li>
+              <li @click="filterByStatus('isReading')">Unread Invoice</li>
               <li @click="filterByStatus('')">Clear Filter</li>
             </ul>
           </transition>
@@ -37,11 +43,24 @@
 
     <!-- Invoices -->
     <div v-if="invoices.length">
-      <Invoice
-        v-for="invoice in invoices"
-        :key="invoice.id"
-        :invoice="invoice"
-      />
+      <transition-group
+        tag="div"
+        :name="isAnimation"
+        appear
+        mode="out-in"
+        @before-enter="beforeEnter"
+        @enter="enter"
+        @before-leave="beforeLeave"
+        @leave="leave"
+        class="parent"
+      >
+        <Invoice
+          v-for="(invoice, index) in invoices"
+          :key="invoice.id"
+          :invoice="invoice"
+          :data-index="index"
+        />
+      </transition-group>
     </div>
 
     <div v-else class="empty flex flex-column">
@@ -56,8 +75,11 @@
 
 <script>
 import Invoice from "../components/Invoice";
-import { ref, computed, reactive } from "vue";
+import { ref, computed } from "vue";
 import { useStore } from "vuex";
+import { formatDistanceToNow } from "date-fns";
+import { gsap } from "gsap";
+
 export default {
   name: "Home",
   components: {
@@ -67,12 +89,32 @@ export default {
     const store = useStore();
     const filterMenu = ref(false);
     const filterStatus = ref(null);
-    const invoices = ref([]);
-    const computedInvoiceData = reactive({
-      invoices: computed(() => store.state.invoiceData),
+    const invoiceModal = computed(() => store.state.invoiceModal);
+    const invoices = computed(() => {
+      return store.state.invoiceData
+        .map((invoice) => {
+          const timeAgo = formatDistanceToNow(invoice.created_at.toDate(), {
+            addSuffix: true,
+            includeSeconds: true,
+          });
+          return { ...invoice, timeAgo: timeAgo };
+        })
+        .filter((invoice) => {
+          if (filterStatus.value === "Draft")
+            return invoice.invoiceDraft === true;
+          if (filterStatus.value === "Pending")
+            return invoice.invoicePending === true;
+          if (filterStatus.value === "Paid")
+            return invoice.invoicePaid === true;
+          if (filterStatus.value === "isReading")
+            return invoice.isReading !== true;
+          return invoice;
+        });
     });
-
-    invoices.value = computedInvoiceData.invoices;
+    const isAnimation = computed(() => {
+      if (store.state.isAnimation) return "invoice";
+      return "";
+    });
 
     const toggleFilterMenu = () => {
       filterMenu.value = !filterMenu.value;
@@ -94,27 +136,41 @@ export default {
 
     const filterByStatus = (status) => {
       if (!status) {
-        filterStatus.value = status;
-        invoices.value = computedInvoiceData.invoices;
+        filterStatus.value = null;
         return;
       }
-      filterStatus.value = `: ${status}`;
-      switch (status) {
-        case "Draft":
-          invoices.value = computedInvoiceData.invoices.filter(
-            (invoice) => invoice.invoiceDraft === true
-          );
-          break;
-        case "Paid":
-          invoices.value = computedInvoiceData.invoices.filter(
-            (invoice) => invoice.invoicePaid === true
-          );
-          break;
-        case "Pending":
-          invoices.value = computedInvoiceData.invoices.filter(
-            (invoice) => invoice.invoicePending === true
-          );
-          break;
+      filterStatus.value = status;
+    };
+
+    /**
+     * ? Animation
+     */
+
+    const beforeEnter = (el) => {
+      if (isAnimation.value) {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(100%)";
+      }
+    };
+    const enter = (el) => {
+      if (isAnimation.value) {
+        gsap.to(el, {
+          opacity: 1,
+          duration: 0.5,
+          delay: el.dataset.index * 0.1,
+          y: 0,
+        });
+      }
+    };
+    const beforeLeave = (el) => {
+      if (isAnimation.value) {
+        el.style.opacity = "1";
+      }
+    };
+    const leave = (el) => {
+      if (isAnimation.value) {
+        el.style.opacity = "0";
+        el.style.position = "absolute";
       }
     };
 
@@ -125,6 +181,12 @@ export default {
       newInvoice,
       filterByStatus,
       filterStatus,
+      invoiceModal,
+      beforeEnter,
+      enter,
+      beforeLeave,
+      leave,
+      isAnimation,
     };
   },
 };
@@ -211,6 +273,17 @@ export default {
         }
       }
     }
+  }
+
+  /**
+  * ? Animation
+  */
+  .parent {
+    position: relative;
+  }
+
+  .invoice-move {
+    transition: all 0.5s ease;
   }
 }
 

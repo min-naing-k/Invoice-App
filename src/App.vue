@@ -9,7 +9,11 @@
         <transition name="invoiceModal">
           <InvoiceModal v-if="invoiceModal" />
         </transition>
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <transition :name="isAnimation" mode="out-in" appear>
+            <component :is="Component"></component>
+          </transition>
+        </router-view>
       </div>
     </div>
     <div v-else class="mobile-message flex flex-column">
@@ -38,6 +42,13 @@ export default {
     const appLoaded = computed(() => store.state.appLoaded);
     const invoiceModal = computed(() => store.state.invoiceModal);
     const modalActive = computed(() => store.state.modalActive);
+    const isAnimation = computed(() => {
+      if (store.state.isAnimation) {
+        return "route";
+      }
+
+      return "";
+    });
 
     const checkScreen = () => {
       if (window.innerWidth <= 750) return (mobile.value = true);
@@ -58,6 +69,7 @@ export default {
       invoiceModal,
       modalActive,
       appLoaded,
+      isAnimation,
     };
   },
 };
@@ -75,6 +87,10 @@ export default {
   justify-content: center;
   align-items: center;
 }
+
+/**
+* ? Invoice Modal Animation
+*/
 .invoiceModal-enter-from,
 .invoiceModal-leave-to {
   left: -100%;
@@ -87,6 +103,10 @@ export default {
 .invoiceModal-leave-active {
   transition: all 0.8s ease-in;
 }
+
+/**
+* ? Modal Animation
+*/
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
@@ -96,5 +116,21 @@ export default {
 .modal-enter-active,
 .modal-leave-active {
   transition: all 0.2s ease;
+}
+
+/**
+* ? Route Animation
+*/
+.route-enter-from,
+.route-leave-to {
+  opacity: 0;
+}
+
+.route-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.route-leave-active {
+  transition: all 0.3s ease-in;
 }
 </style>

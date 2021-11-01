@@ -4,8 +4,12 @@
       class="invoice flex"
       :to="{ name: 'invoiceDetail', params: { id: invoice.id } }"
     >
+      <div class="notification" v-if="!invoice.isReading"></div>
       <div class="left flex">
-        <span class="tracking-number">#{{ invoice.invoiceId }}</span>
+        <span class="tracking-number">
+          #{{ invoice.invoiceId }}
+          <p class="time-ago">{{ invoice.timeAgo }}</p>
+        </span>
         <span class="due-date">{{ invoice.paymentDueDate }}</span>
         <span class="person">{{ invoice.clientName }}</span>
       </div>
@@ -40,6 +44,7 @@ export default {
 
 <style lang="scss" scoped>
 .invoice {
+  position: relative;
   text-decoration: none;
   cursor: pointer;
   gap: 16px;
@@ -49,6 +54,17 @@ export default {
   padding: 28px 32px;
   background-color: #1e2139;
   align-items: center;
+
+  .notification {
+    position: absolute;
+    top: 0.1rem;
+    right: 0.1rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: red;
+  }
+
   span {
     font-size: 13px;
   }
@@ -61,6 +77,15 @@ export default {
     }
     .tracking-number {
       text-transform: uppercase;
+      position: relative;
+
+      .time-ago {
+        position: absolute;
+        top: 1.3rem;
+        font-size: 0.675rem;
+        text-transform: lowercase;
+        color: hsl(0, 0, 65%);
+      }
     }
   }
   .right {

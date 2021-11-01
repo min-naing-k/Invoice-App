@@ -118,7 +118,7 @@
 </template>
 
 <script>
-import { computed, ref, watch } from "vue";
+import { computed } from "vue";
 import { useStore } from "vuex";
 import { db } from "../firebase/config";
 import { useRouter } from "vue-router";
@@ -128,10 +128,7 @@ export default {
   setup(props) {
     const store = useStore();
     const router = useRouter();
-    const invoice = ref(null);
-    const data = computed(() => store.state.invoiceDetail[0]);
-    const editModal = computed(() => store.state.editModal);
-    const status = computed(() => store.state.status);
+    const invoice = computed(() => store.state.invoiceDetail[0]);
 
     store.commit("getInvoice", props.id);
 
@@ -142,16 +139,6 @@ export default {
       store.commit("toggleEditModal");
       store.commit("toggleInvoiceModal");
     };
-
-    invoice.value = data.value;
-
-    watch(editModal, () => {
-      invoice.value = data.value;
-    });
-
-    watch(status, () => {
-      invoice.value = data.value;
-    });
 
     /**
      * * Delete Invoice
@@ -169,7 +156,6 @@ export default {
         invoicePaid: true,
         invoicePending: null,
       });
-      store.commit("toggleStatus");
       store.commit("getInvoice", props.id);
     };
     /**
@@ -181,9 +167,21 @@ export default {
         invoicePaid: null,
         invoiceDraft: null,
       });
-      store.commit("toggleStatus");
       store.commit("getInvoice", props.id);
     };
+
+    /**
+     * * isReading
+     */
+    const updateIsReading = async () => {
+      await db.collection("invoices").doc(props.id).update({
+        isReading: true,
+      });
+    };
+
+    if (invoice.value && !invoice.value.isReading) {
+      updateIsReading();
+    }
 
     return {
       invoice,
