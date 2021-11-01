@@ -385,6 +385,7 @@ export default {
         invoicePaid: null,
         invoiceItemList: state.invoiceItemList,
         invoiceTotal: state.invoiceTotal,
+        isReading: null,
       };
 
       const { error, addDoc } = useCollection("invoices");

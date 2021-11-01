@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "date-fns": "^2.25.0",
     "firebase": "^8.10.0",
+    "gsap": "^3.8.0",
     "uid": "^2.0.0",
     "vue": "^3.0.11",
     "vue-router": "^4.0.0-0",
