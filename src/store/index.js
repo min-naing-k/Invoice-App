@@ -13,7 +13,7 @@ export default createStore({
   },
   mutations: {
     updateAppLoaded(state) {
-      state.appLoaded = false;
+      state.appLoaded = !state.appLoaded;
     },
     toggleInvoiceModal(state) {
       state.invoiceModal = !state.invoiceModal;

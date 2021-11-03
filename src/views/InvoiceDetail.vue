@@ -145,7 +145,7 @@ export default {
      */
     const deleteInvoice = async (id) => {
       await db.collection("invoices").doc(id).delete();
-      router.push("/");
+      router.push({ name: "Home" });
     };
 
     /**
