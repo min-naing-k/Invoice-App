@@ -27,7 +27,7 @@
               <li @click="filterByStatus('Draft')">Draft</li>
               <li @click="filterByStatus('Pending')">Pending</li>
               <li @click="filterByStatus('Paid')">Paid</li>
-              <li @click="filterByStatus('isReading')">Unread Invoice</li>
+              <li @click="filterByStatus('Unread')">Unread Invoice</li>
               <li @click="filterByStatus('')">Clear Filter</li>
             </ul>
           </transition>
@@ -106,7 +106,7 @@ export default {
             return invoice.invoicePending === true;
           if (filterStatus.value === "Paid")
             return invoice.invoicePaid === true;
-          if (filterStatus.value === "isReading")
+          if (filterStatus.value === "Unread")
             return invoice.isReading !== true;
           return invoice;
         });

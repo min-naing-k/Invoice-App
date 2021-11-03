@@ -21,7 +21,9 @@
       <p>If you want to use, please use desktop and tablet.</p>
     </div>
   </div>
-  <div v-else class="app-loaded">Loading Data.....</div>
+  <div v-else class="app-loaded">
+    <div class="spinner"></div>
+  </div>
 </template>
 
 <script>
@@ -86,6 +88,24 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    border-top-color: #545b96;
+    animation: spinner 1s linear infinite;
+  }
+
+  @keyframes spinner {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 }
 
 /**

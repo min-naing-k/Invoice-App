@@ -31,10 +31,10 @@
 
 // console.log(people_v2);
 
-const isReading = null;
+// const isReading = null;
 
-if (!isReading) {
-  console.log('not reading');
-} else {
-  console.log('is already read');
-}
+// if (!isReading) {
+//   console.log('not reading');
+// } else {
+//   console.log('is already read');
+// }

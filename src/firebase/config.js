@@ -1,5 +1,6 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDcWaqeYxKVPt1dRExV2M0Np1zkg2E_c10',
@@ -19,4 +20,10 @@ const db = firebase.firestore();
 // for created_at
 const timestamp = firebase.firestore.FieldValue.serverTimestamp;
 
-export { db, timestamp };
+// for authentication
+const auth = firebase.auth();
+
+// for signIn with google
+const provider = new firebase.auth.GoogleAuthProvider();
+
+export { db, timestamp, auth, provider };

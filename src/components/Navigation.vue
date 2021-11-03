@@ -4,6 +4,10 @@
       <img src="@/assets/invoice.png" alt="file-invoice-dollar-solid" />
     </div>
     <div class="setting flex">
+      <div v-if="user">
+        <span style="color: #fff">{{ user.displayName }}</span>
+        <button @click="handleSignOut" type="button">Sign Out</button>
+      </div>
       <img
         @click="toggleSetting"
         id="setting"
@@ -33,12 +37,19 @@
 <script>
 import { ref } from "vue";
 import { useStore } from "vuex";
+import { useRouter } from "vue-router";
+import useSignOut from "../composable/useSignOut";
+import getUser from "../composable/getUser";
 
 export default {
   name: "navigation",
   setup() {
     const store = useStore();
+    const router = useRouter();
     const toggleSettingDropdown = ref(null);
+
+    const { user } = getUser();
+
     const toggleSetting = () => {
       toggleSettingDropdown.value = !toggleSettingDropdown.value;
     };
@@ -57,10 +68,23 @@ export default {
       store.commit("toggleAnimation");
     };
 
+    const { error, signOut } = useSignOut();
+
+    const handleSignOut = async () => {
+      await signOut();
+      router.push({ name: "Auth" });
+    };
+
+    if (error.value) {
+      console.log(error.value);
+    }
+
     return {
       toggleSetting,
       toggleSettingDropdown,
       toggleAnimation,
+      handleSignOut,
+      user,
     };
   },
 };
@@ -103,6 +127,12 @@ header {
     justify-content: center;
     align-items: center;
     padding: 1rem;
+
+    button {
+      background-color: unset;
+      padding: 1rem;
+      border-radius: unset;
+    }
 
     img {
       width: auto;
