@@ -1,6 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
+import 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDcWaqeYxKVPt1dRExV2M0Np1zkg2E_c10',
@@ -26,4 +27,7 @@ const auth = firebase.auth();
 // for signIn with google
 const provider = new firebase.auth.GoogleAuthProvider();
 
-export { db, timestamp, auth, provider };
+// for store and retrieve images
+const storage = firebase.storage();
+
+export { db, timestamp, auth, provider, storage };

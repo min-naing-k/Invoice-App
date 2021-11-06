@@ -1,79 +1,82 @@
 <template>
-  <div class="home container">
-    <!-- Header -->
-    <div class="header flex">
-      <div class="left flex flex-column">
-        <h1>Invoices</h1>
-        <span v-if="invoices.length">
-          There are {{ invoices.length }} total
-          {{ invoices.length > 1 ? "invoices" : "invoice" }}
-        </span>
-      </div>
-      <div class="right flex">
-        <div @click="toggleFilterMenu" class="filter flex dropdown">
-          <span class="dropdown">
-            Filter by status
-            <span v-if="filterStatus" class="dropdown">
-              : {{ filterStatus }}
-            </span>
+  <div>
+    <Navigation />
+    <div class="home container">
+      <!-- Header -->
+      <div class="header flex">
+        <div class="left flex flex-column">
+          <h1>Invoices</h1>
+          <span v-if="invoices.length">
+            There are {{ invoices.length }} total
+            {{ invoices.length > 1 ? "invoices" : "invoice" }}
           </span>
-          <img
-            src="@/assets/icon-arrow-down.svg"
-            alt="icon-arrow-down"
-            class="dropdown"
-          />
-          <transition name="dropdown">
-            <ul v-show="filterMenu" class="filter-menu">
-              <li @click="filterByStatus('Draft')">Draft</li>
-              <li @click="filterByStatus('Pending')">Pending</li>
-              <li @click="filterByStatus('Paid')">Paid</li>
-              <li @click="filterByStatus('Unread')">Unread Invoice</li>
-              <li @click="filterByStatus('')">Clear Filter</li>
-            </ul>
-          </transition>
         </div>
-        <div @click="newInvoice" class="button flex">
-          <div class="inner-button flex">
-            <img src="@/assets/icon-plus.svg" alt="icon-plus" />
+        <div class="right flex">
+          <div @click="toggleFilterMenu" class="filter flex dropdown">
+            <span class="dropdown">
+              Filter by status
+              <span v-if="filterStatus" class="dropdown">
+                : {{ filterStatus }}
+              </span>
+            </span>
+            <img
+              src="@/assets/icon-arrow-down.svg"
+              alt="icon-arrow-down"
+              class="dropdown"
+            />
+            <transition name="dropdown">
+              <ul v-show="filterMenu" class="filter-menu">
+                <li @click="filterByStatus('Draft')">Draft</li>
+                <li @click="filterByStatus('Pending')">Pending</li>
+                <li @click="filterByStatus('Paid')">Paid</li>
+                <li @click="filterByStatus('Unread')">Unread Invoice</li>
+                <li @click="filterByStatus('')">Clear Filter</li>
+              </ul>
+            </transition>
           </div>
-          <span>New Invoice</span>
+          <div @click="newInvoice" class="button flex">
+            <div class="inner-button flex">
+              <img src="@/assets/icon-plus.svg" alt="icon-plus" />
+            </div>
+            <span>New Invoice</span>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- Invoices -->
-    <div v-if="invoices.length">
-      <transition-group
-        tag="div"
-        :name="isAnimation"
-        appear
-        mode="out-in"
-        @before-enter="beforeEnter"
-        @enter="enter"
-        @before-leave="beforeLeave"
-        @leave="leave"
-        class="parent"
-      >
-        <Invoice
-          v-for="(invoice, index) in invoices"
-          :key="invoice.id"
-          :invoice="invoice"
-          :data-index="index"
-        />
-      </transition-group>
-    </div>
-
-    <div v-else class="empty flex flex-column">
-      <img src="@/assets/illustration-empty.svg" alt="empty" />
-      <h3>There is nothing here</h3>
-      <p>
-        Create a new invoice by clicking the New Invoice button and get started
-      </p>
+      <!-- Invoices -->
+      <div v-if="invoices.length">
+        <transition-group
+          tag="div"
+          :name="isAnimation"
+          appear
+          mode="out-in"
+          @before-enter="beforeEnter"
+          @enter="enter"
+          @before-leave="beforeLeave"
+          @leave="leave"
+          class="parent"
+        >
+          <Invoice
+            v-for="(invoice, index) in invoices"
+            :key="invoice.id"
+            :invoice="invoice"
+            :data-index="index"
+          />
+        </transition-group>
+      </div>
+      <div v-else class="empty flex flex-column">
+        <img src="@/assets/illustration-empty.svg" alt="empty" />
+        <h3>There is nothing here</h3>
+        <p>
+          Create a new invoice by clicking the New Invoice button and get
+          started
+        </p>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import Navigation from "../components/Navigation";
 import Invoice from "../components/Invoice";
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
@@ -83,6 +86,7 @@ import { gsap } from "gsap";
 export default {
   name: "Home",
   components: {
+    Navigation,
     Invoice,
   },
   setup() {
@@ -195,6 +199,8 @@ export default {
 <style lang="scss" scoped>
 .home {
   color: #fff;
+  padding-left: 20px;
+  padding-right: 20px;
 
   .header {
     margin-bottom: 65px;

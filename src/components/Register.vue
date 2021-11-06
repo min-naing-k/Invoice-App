@@ -2,33 +2,12 @@
   <div class="register">
     <form @submit.prevent="submitRegister" class="form">
       <h3>Register</h3>
-      <!-- <div
-        @click="$refs.fileInput.click"
-        class="img-wrapper"
-        :class="{ removeBorderColor: previewImg }"
-      >
-        <input
-          @change="fileUpload"
-          type="file"
-          hidden
-          ref="fileInput"
-          accept="image/*"
-        />
-        <div class="photograph-wrapper">
-          <img
-            src="@/assets/photograph.png"
-            alt="photograph"
-            class="photograph"
-          />
+      <div v-if="error" class="error">
+        <div class="img">
+          <img src="@/assets/error-message.png" alt="error" />
         </div>
-        <img src="@/assets/user.png" alt="user" class="user" />
-        <img
-          v-if="previewImg"
-          :src="previewImg"
-          alt="preview"
-          class="preview"
-        />
-      </div> -->
+        <span>{{ error }}</span>
+      </div>
       <div class="form-wrapper">
         <label for="name">Name</label>
         <input
@@ -37,6 +16,8 @@
           class="form-control"
           autocomplete="off"
           placeholder="Enter Your Name..."
+          required
+          v-model="name"
         />
       </div>
       <div class="form-wrapper">
@@ -47,6 +28,8 @@
           class="form-control"
           autocomplete="off"
           placeholder="Enter Your Email..."
+          required
+          v-model="email"
         />
       </div>
       <div class="form-wrapper">
@@ -56,10 +39,15 @@
           id="password"
           class="form-control"
           placeholder="Enter Your Password..."
+          required
+          v-model="password"
         />
       </div>
       <div class="btn-wrapper">
-        <input type="submit" value="Register" class="btn-submit" />
+        <div v-if="btnLoading" class="btn-loading">
+          <span></span>
+        </div>
+        <input v-else type="submit" value="Register" class="btn-submit" />
       </div>
       <p class="text">
         Already a Member ? Please
@@ -71,31 +59,36 @@
 
 <script>
 import { reactive, toRefs } from "vue";
+import { useRouter } from "vue-router";
+import useSignUp from "../composable/useSignUp";
+
 export default {
   setup() {
+    const router = useRouter();
     const state = reactive({
-      previewImg: null,
+      name: null,
+      email: null,
+      password: null,
+      error: null,
+      btnLoading: false,
     });
 
-    const submitRegister = () => {
-      alert("hi");
-    };
+    const { error, signUp } = useSignUp();
 
-    const fileUpload = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.addEventListener("load", () => {
-          state.previewImg = reader.result;
-        });
-        reader.readAsDataURL(file);
+    const submitRegister = async () => {
+      state.btnLoading = true;
+      const cred = await signUp(state.name, state.email, state.password);
+      state.btnLoading = false;
+      if (cred) {
+        router.push({ name: "Verify" });
       }
+      state.password = null;
+      state.error = error.value;
     };
 
     return {
       ...toRefs(state),
       submitRegister,
-      fileUpload,
     };
   },
 };
@@ -109,6 +102,35 @@ export default {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
   max-width: 450px;
   width: 100%;
+
+  .error {
+    font-size: 0.785rem;
+    margin-bottom: 1rem;
+    background-color: #b64141;
+    border-radius: 0.375rem;
+    display: flex;
+    overflow: hidden;
+
+    .img {
+      background-color: #9e2b2b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.8rem;
+
+      img {
+        width: 30px;
+        height: 30px;
+        object-fit: cover;
+      }
+    }
+
+    span {
+      display: flex;
+      align-items: center;
+      padding: 0.8rem;
+    }
+  }
 
   .removeBorderColor {
     border-color: transparent !important;
@@ -128,57 +150,6 @@ export default {
       width: 6%;
       height: 3px;
       background: linear-gradient(to right, #aa96f8, #7c5dfa);
-      border-radius: 1rem;
-    }
-  }
-
-  .img-wrapper {
-    position: relative;
-    width: 100px;
-    height: 100px;
-    border: 1px dashed #31355af3;
-    border-radius: 1rem;
-    margin-bottom: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-
-    .photograph-wrapper {
-      position: absolute;
-      right: -0.3rem;
-      bottom: -0.3rem;
-      background-color: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.1);
-      }
-
-      .photograph {
-        width: auto;
-        height: 15px;
-      }
-    }
-
-    .user {
-      width: 60%;
-      height: 60%;
-    }
-
-    .preview {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
       border-radius: 1rem;
     }
   }
@@ -209,32 +180,56 @@ export default {
     }
   }
 
-  .btn-submit {
-    display: block;
-    width: 100%;
-    padding: 0.5rem 1.5rem;
+  .btn-wrapper {
     margin-bottom: 1rem;
-    font-size: 0.875rem;
-    border-radius: 0.375rem;
-    border: none;
-    cursor: pointer;
     background-color: #7c5dfa;
-    color: #f2f2f2;
-    transition: all 0.2s ease;
-
-    &:hover {
-      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-      background-color: #6146cc;
-    }
-  }
-
-  .btn-google {
-    display: block;
-    width: 100%;
-    border: 1px solid #31355a85;
-    padding: 0.5rem 1.5rem;
     border-radius: 0.375rem;
-    background-color: transparent;
+    height: 40px;
+
+    .btn-loading {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: not-allowed;
+
+      span {
+        width: 25px;
+        height: 25px;
+        border: 2px solid transparent;
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spinner 1s linear infinite;
+      }
+
+      @keyframes spinner {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    }
+
+    .btn-submit {
+      display: block;
+      width: 100%;
+      height: 100%;
+      font-size: 0.875rem;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      background-color: transparent;
+      color: #f2f2f2;
+      transition: all 0.2s ease;
+
+      &:hover {
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        background-color: #6146cc;
+      }
+    }
   }
 
   .text {
