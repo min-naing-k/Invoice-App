@@ -1,6 +1,6 @@
 <template>
   <div class="auth flex">
-    <Login v-if="isLogin" @register="isLogin = $event" />
+    <Login v-if="isLogin" @login="isLogin = $event" />
     <Register v-else @register="isLogin = $event" />
   </div>
 </template>

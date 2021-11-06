@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Navigation />
     <div v-if="invoice">
       <div class="invoice-view container">
         <router-link class="nav-link flex" :to="{ name: 'Home' }">
@@ -118,12 +119,14 @@
 </template>
 
 <script>
+import Navigation from "../components/Navigation";
 import { computed } from "vue";
 import { useStore } from "vuex";
 import { db } from "../firebase/config";
 import { useRouter } from "vue-router";
 
 export default {
+  components: { Navigation },
   props: ["id"],
   setup(props) {
     const store = useStore();
@@ -197,6 +200,9 @@ export default {
 
 <style lang="scss" scoped>
 .invoice-view {
+  padding-left: 20px;
+  padding-right: 20px;
+
   .nav-link {
     margin-bottom: 32px;
     align-items: center;

@@ -3,6 +3,8 @@ import Home from '../views/Home.vue';
 import InvoiceDetail from '../views/InvoiceDetail.vue';
 import Auth from '../views/Auth.vue';
 import NotFound from '../components/NotFound.vue';
+import Verify from '../views/Verify.vue';
+import EditProfile from '../components/EditProfile.vue';
 import { auth } from '../firebase/config';
 
 const routes = [
@@ -11,7 +13,10 @@ const routes = [
     name: 'Auth',
     component: Auth,
     beforeEnter(to, from, next) {
-      if (!auth.currentUser) {
+      if (
+        !auth.currentUser ||
+        (auth.currentUser && !auth.currentUser.emailVerified)
+      ) {
         next();
       } else {
         next({ name: 'Home' });
@@ -23,10 +28,12 @@ const routes = [
     name: 'Home',
     component: Home,
     beforeEnter(to, from, next) {
-      if (auth.currentUser) {
-        next();
-      } else {
+      if (auth.currentUser && !auth.currentUser.emailVerified) {
+        next({ name: 'Verify' });
+      } else if (!auth.currentUser) {
         next({ name: 'Auth' });
+      } else {
+        next();
       }
     },
   },
@@ -37,6 +44,31 @@ const routes = [
     props: true,
     beforeEnter(to, from, next) {
       if (auth.currentUser) {
+        next();
+      } else {
+        next({ name: 'Auth' });
+      }
+    },
+  },
+  {
+    path: '/email/verify',
+    name: 'Verify',
+    component: Verify,
+    beforeEnter(to, from, next) {
+      if (auth.currentUser && !auth.currentUser.emailVerified) {
+        next();
+      } else {
+        next({ name: 'Home' });
+      }
+    },
+  },
+  {
+    path: '/user/profile/:id',
+    name: 'EditProfile',
+    component: EditProfile,
+    props: true,
+    beforeEnter(to, from, next) {
+      if (auth.currentUser && auth.currentUser.emailVerified) {
         next();
       } else {
         next({ name: 'Auth' });
