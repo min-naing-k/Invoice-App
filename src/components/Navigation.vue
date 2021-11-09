@@ -4,16 +4,16 @@
       <img src="@/assets/invoice.png" alt="file-invoice-dollar-solid" />
     </div>
     <div class="bottom">
-      <div v-if="user" class="profile-wrapper">
+      <div v-if="currentUser" class="profile-wrapper">
         <img
           @click="profileMenu = !profileMenu"
-          :src="user.photoURL"
+          :src="currentUser.image"
           alt="profile"
         />
         <transition name="dropdown">
           <div v-if="profileMenu" class="profile-menu-dropdown">
             <router-link
-              :to="{ name: 'EditProfile', params: { id: user.uid } }"
+              :to="{ name: 'EditProfile', params: { id: currentUser.id } }"
               class="edit-profile"
             >
               Edit Profile
@@ -56,6 +56,7 @@
 import { ref } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
+import { db } from "../firebase/config";
 import useSignOut from "../composable/useSignOut";
 import getUser from "../composable/getUser";
 
@@ -64,10 +65,17 @@ export default {
   setup() {
     const store = useStore();
     const router = useRouter();
+    const currentUser = ref(null);
     const profileMenu = ref(null);
     const toggleSettingDropdown = ref(null);
 
     const { user } = getUser();
+
+    db.collection("users")
+      .doc(user.value.uid)
+      .onSnapshot((snap) => {
+        currentUser.value = snap.data();
+      });
 
     const toggleSetting = () => {
       toggleSettingDropdown.value = !toggleSettingDropdown.value;
@@ -104,8 +112,8 @@ export default {
       toggleSettingDropdown,
       toggleAnimation,
       handleSignOut,
-      user,
       profileMenu,
+      currentUser,
     };
   },
 };
@@ -166,7 +174,10 @@ header {
       img {
         width: 30px;
         height: 30px;
+        border-radius: 50%;
         cursor: pointer;
+        object-fit: cover;
+        object-position: center;
       }
 
       .profile-menu-dropdown {
