@@ -1,3 +1,4 @@
+import { uid } from 'uid';
 import { ref } from 'vue';
 import { auth, db, storage } from '../firebase/config';
 
@@ -29,6 +30,7 @@ const useSignUp = () => {
         .doc(user.uid)
         .set({
           id: user.uid,
+          userID: uid(6),
           name: user.displayName,
           email: user.email,
           address: null,

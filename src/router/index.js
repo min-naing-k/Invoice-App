@@ -54,6 +54,7 @@ const routes = [
     path: '/email/verify',
     name: 'Verify',
     component: Verify,
+    props: true,
     beforeEnter(to, from, next) {
       if (auth.currentUser && !auth.currentUser.emailVerified) {
         next();

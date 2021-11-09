@@ -2,12 +2,13 @@
   <div class="login">
     <form @submit.prevent="submitLogin" class="form">
       <h3>Log In</h3>
-      <div v-if="error" class="error">
-        <div class="img">
-          <img src="@/assets/error-message.png" alt="error" />
-        </div>
-        <span>{{ error }}</span>
-      </div>
+      <Alert
+        v-if="message"
+        :messageType="messageType"
+        @updateMessageType="message = $event"
+      >
+        {{ message }}
+      </Alert>
       <div class="form-wrapper">
         <label for="email">Email</label>
         <input
@@ -16,7 +17,6 @@
           class="form-control"
           autocomplete="off"
           placeholder="Enter Your Email..."
-          required
           v-model="email"
         />
       </div>
@@ -27,10 +27,12 @@
           id="password"
           class="form-control"
           placeholder="Enter Your Password..."
-          required
           v-model="password"
         />
       </div>
+      <p @click="handleResetPassword(email)" class="forget-password">
+        Forget Password ?
+      </p>
       <div>
         <div class="btn-wrapper">
           <div v-if="btnLoading" class="btn-loading">
@@ -57,16 +59,21 @@
 </template>
 
 <script>
+import Alert from "./Alert";
 import useSignIn from "../composable/useSignIn";
 import { useRouter } from "vue-router";
 import { reactive, ref, toRefs } from "vue";
+import { auth } from "../firebase/config";
 
 export default {
+  components: { Alert },
   setup() {
     const router = useRouter();
     const state = reactive({
       email: null,
       password: null,
+      messageType: null,
+      message: null,
     });
     const btnLoading = ref(null);
     const btnGoogleLoading = ref(null);
@@ -76,9 +83,13 @@ export default {
       btnLoading.value = true;
       const cred = await signIn(state.email, state.password);
       btnLoading.value = false;
-      if (cred) {
-        router.push({ name: "Home" });
+      if (!cred) {
+        state.messageType = "error";
+        state.message = error.value;
+        return;
       }
+
+      router.push({ name: "Home" });
     };
 
     const signInGoogle = async () => {
@@ -90,6 +101,27 @@ export default {
       }
     };
 
+    const handleResetPassword = async (email) => {
+      try {
+        if (!email) throw new Error("Email Can't be Empty");
+        await auth.sendPasswordResetEmail(email, {
+          url: "http://localhost:8080/",
+        });
+        if (error.value) {
+          error.value = null;
+        }
+        state.message =
+          "We Send Password Rest Link To Your Email. Please Check !";
+        state.messageType = "success";
+      } catch (e) {
+        error.value = e.message;
+      }
+      if (error.value) {
+        state.messageType = "error";
+        state.message = error.value;
+      }
+    };
+
     return {
       ...toRefs(state),
       submitLogin,
@@ -97,6 +129,7 @@ export default {
       btnLoading,
       btnGoogleLoading,
       error,
+      handleResetPassword,
     };
   },
 };
@@ -182,6 +215,13 @@ export default {
         border-color: #7c5dfa;
       }
     }
+  }
+
+  .forget-password {
+    font-size: 0.75rem;
+    margin-bottom: 1rem;
+    color: #ccccccbe;
+    cursor: pointer;
   }
 
   .btn-wrapper {
